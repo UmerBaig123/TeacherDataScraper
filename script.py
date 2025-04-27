@@ -13,9 +13,9 @@ import pandas as pd
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 import math
 class TeacherScraper:
-    def __init__(self,url:str):
+    def __init__(self,url:str,max_page:int=math.inf):
         self.url = url 
-        self.max_page = 20
+        self.max_page = max_page
         self.driver = self.open_chrome()
         self.open_url()
         self.history = pd.DataFrame(columns=["title", "link", "address", "deadline", "salary"]) 
@@ -56,6 +56,7 @@ class TeacherScraper:
         self.driver.get(self.url)
         time.sleep(random.uniform(0.5, 1.5))  # Random sleep between 0.5 and 1.5 seconds
     def scrape_website(self): 
+        self.set_max_page()
         while True: 
             self.scrape_page_data() 
             if not self.go_to_next_page():
@@ -87,7 +88,8 @@ class TeacherScraper:
             if len(li_elements) >= 2:    
                 second_last_li = li_elements[-2]
                 text_content = second_last_li.text
-                self.max_page = int(text_content)
+                if int(text_content) < self.max_page:
+                    self.max_page = int(text_content)
                 print("Max page:", self.max_page)
         except Exception as e:
             print("Error while collecting data on page:", e) 
